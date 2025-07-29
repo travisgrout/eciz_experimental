@@ -101,14 +101,8 @@ def main():
                     naics_code = int(selection_data[f'impacted_naics4_{i}'])
                     emp_in_group = int(selection_data[f'emp_naics4_{i}'])
                     emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
-                    table_rows_html += f"""
-                    <tr>
-                        <td>{i}</td>
-                        <td>{ind_group}</td>
-                        <td>{naics_code}</td>
-                        <td><b>{emp_percent}%</b></td>
-                    </tr>
-                    """
+                    # CORRECTED LINE: Changed to a single-line f-string to avoid unwanted whitespace.
+                    table_rows_html += f"<tr><td>{i}</td><td>{ind_group}</td><td>{naics_code}</td><td><b>{emp_percent}%</b></td></tr>"
 
             # Now, construct the entire HTML block in one go using a single f-string
             full_html = f"""
