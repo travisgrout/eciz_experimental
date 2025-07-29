@@ -78,7 +78,18 @@ def main():
 
             # --- Display Title and Map ---
             st.header(f"Employment in {selected_county} County, {selected_state} inundation zone for a {selected_inundation.lower()}")
-
+            st.markdown(f"""
+            <div style='font-size: 18px;'>
+                <ul>
+                    <li>In 2021, there were approximately <b>{establishments:,}</b> {selected_county} County employers in a {selected_inundation.lower()} inundation zone.</li>
+                    <li><b>{employment:,}</b> people worked at those businesses.</li>
+                    <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.info("Please complete all selections above to view the analysis.")
+            
             # A mapping of full state names to their abbreviations for file naming
             state_abbreviations = {
                 'Alabama': 'AL',
