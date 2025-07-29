@@ -51,7 +51,6 @@ def main():
         with col2:
             # County selection (populated based on state)
             if selected_state:
-                # The 'County' column in the new file includes " County", so we use it directly
                 counties = sorted(df[df['State'] == selected_state]['County'].unique())
                 selected_county = st.selectbox("Select a County", [""] + counties)
             else:
@@ -97,7 +96,7 @@ def main():
             # --- Display Title ---
             # Remove " County" from display title for better readability
             display_county = selected_county.replace(" County", "")
-            st.header(f"Employment in {display_county} County, {selected_state} inundation zones for a {selected_inundation.lower()}")
+            st.header(f"Employment in {display_county} County, {selected_state} inundation zones: {selected_inundation.lower()}")
             
             # --- Create columns for stats and map ---
             stat_col, map_col = st.columns([3, 2]) # 60/40 split
