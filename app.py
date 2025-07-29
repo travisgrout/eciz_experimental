@@ -4,7 +4,7 @@ import os
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="Employment in Coastal Inundation Zones",
+    page_title="SLOSH Inundation Zone Economic Impacts",
     layout="wide"
 )
 
@@ -14,6 +14,7 @@ st.set_page_config(
 def load_data(file_path):
     """Loads the CSV data into a pandas DataFrame."""
     try:
+        # Load the new CSV file
         return pd.read_csv(file_path)
     except FileNotFoundError:
         st.error(f"Error: The file '{file_path}' was not found. Please make sure it's in the correct directory.")
@@ -23,9 +24,9 @@ def load_data(file_path):
 def main():
     """Main function to run the Streamlit app."""
     st.title("Employment in Coastal Inundation Zones")
-    st.markdown("Select a state, county, and inundation type to learn about potential inundation impacts for local businesses.")
+    st.markdown("Select a state, county, and storm category to learn about the potential economic impacts on local businesses.")
 
-    # Load data
+    # Load data from the new spreadsheet
     df = load_data("Expected losses by county and zone.csv")
 
     if df is not None:
@@ -40,6 +41,7 @@ def main():
         with col2:
             # County selection (populated based on state)
             if selected_state:
+                # The 'County' column in the new file includes " County", so we use it directly
                 counties = sorted(df[df['State'] == selected_state]['County'].unique())
                 selected_county = st.selectbox("Select a County", [""] + counties)
             else:
@@ -49,7 +51,8 @@ def main():
         with col3:
             # Inundation type selection (populated based on state and county)
             if selected_state and selected_county:
-                inundation_types = sorted(df[(df['State'] == selected_state) & (df['County'] == selected_county)]['SLOSH'].unique())
+                # The 'inundation_zone' column holds the user-friendly name
+                inundation_types = sorted(df[(df['State'] == selected_state) & (df['County'] == selected_county)]['inundation_zone'].unique())
                 selected_inundation = st.selectbox("Select Inundation Type", [""] + inundation_types)
             else:
                 st.selectbox("Select Inundation Type", [], disabled=True)
@@ -63,46 +66,66 @@ def main():
             selection_data = df[
                 (df['State'] == selected_state) &
                 (df['County'] == selected_county) &
-                (df['SLOSH'] == selected_inundation)
+                (df['inundation_zone'] == selected_inundation)
             ].iloc[0]
 
-            # Extract data from the selected row
+            # --- Extract Data ---
             establishments = int(selection_data['Establishments'])
             employment = int(selection_data['Employment'])
             wages_week = selection_data['wages_week']
             sales_week = selection_data['sales_week']
+            county_establishments = int(selection_data['county_establishments'])
+            county_employment = int(selection_data['county_employment'])
+            total_emp_in_zone = int(selection_data['baEMP'])
 
-            # Format monetary values to millions, rounded to the nearest 100,000
+            # --- Calculations ---
+            percent_establishments = round((establishments / county_establishments) * 100) if county_establishments > 0 else 0
+            percent_employment = round((employment / county_employment) * 100) if county_employment > 0 else 0
             lost_wages_millions = round(wages_week / 1_000_000, 1)
             lost_sales_millions = round(sales_week / 1_000_000, 1)
 
-            # --- Display Title and Map ---
-            st.header(f"Employment in {selected_county} County, {selected_state} inundation zone for a {selected_inundation.lower()}")
-            st.markdown(f"""
+            # --- Display Title ---
+            # Remove " County" from display title for better readability
+            display_county = selected_county.replace(" County", "")
+            st.header(f"Employment in {display_county} County, {selected_state} inundation zones for a {selected_inundation.lower()}")
+            
+            # --- Generate Key Statistics HTML ---
+            stats_html = f"""
             <div style='font-size: 18px;'>
                 <ul>
-                    <li>In 2021, there were approximately <b>{establishments:,}</b> {selected_county} County employers in a {selected_inundation.lower()} inundation zone.</li>
-                    <li><b>{employment:,}</b> people worked at those businesses.</li>
-                    <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
+                    <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
+                    <li><b>{employment:,}</b> people worked at those businesses (<b>{percent_employment}%</b> of all jobs in {display_county} County).</li>
+                    <li>A one-week closure of establishments in this inundation zone would result in about <b>\${lost_wages_millions:.1f} million</b> in lost wages and about <b>\${lost_sales_millions:.1f} million</b> in lost business sales.</li>
                 </ul>
-            </div>
-            """, unsafe_allow_html=True)
+                <p>The industry groups most affected by inundation in this zone would be:</p>
+                <ol>
+            """
             
-            # A mapping of full state names to their abbreviations for file naming
-            state_abbreviations = {
-                'Alabama': 'AL',
-                'Mississippi': 'MS',
-                # Add other states and abbreviations as needed
-            }
+            industry_list = []
+            for i in range(1, 6):
+                ind_group = selection_data[f'impacted_indgrp_{i}']
+                if pd.notna(ind_group):
+                    naics_code = int(selection_data[f'impacted_naics4_{i}'])
+                    emp_in_group = int(selection_data[f'emp_naics4_{i}'])
+                    emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
+                    industry_list.append(f"<li>{ind_group} (NAICS {naics_code}): <b>{emp_percent}%</b> of employees working in the inundation zone</li>")
+            
+            stats_html += "".join(industry_list)
+            stats_html += "</ol></div>"
 
-            # Construct the image file path
+            st.subheader("Key Business Statistics")
+            st.markdown(stats_html, unsafe_allow_html=True)
+            
+            # --- Display Map ---
+            state_abbreviations = {'Alabama': 'AL', 'Mississippi': 'MS'}
             state_abbr = state_abbreviations.get(selected_state, '')
             slosh_cat_num = ''.join(filter(str.isdigit, selected_inundation))
-            image_name = f"{selected_county}_{state_abbr}_cat{slosh_cat_num}.jpg"
+            # Use display_county for filename consistency
+            image_name = f"{display_county}_{state_abbr}_cat{slosh_cat_num}.jpg"
             image_path = os.path.join("Inundation Maps", image_name)
 
             if os.path.exists(image_path):
-                st.image(image_path, caption=f"Inundation zone map for {selected_county} County, {selected_state} - {selected_inundation}")
+                st.image(image_path, caption=f"Inundation zone map for {display_county} County, {selected_state} - {selected_inundation}")
             else:
                 st.warning(f"Map file not found at the expected path: {image_path}. Please ensure maps are in the 'Inundation Maps' folder.")
         else:
