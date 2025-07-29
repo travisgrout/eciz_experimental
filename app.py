@@ -84,13 +84,17 @@ def main():
             lost_wages_millions = round(wages_week / 1_000_000, 1)
             lost_sales_millions = round(sales_week / 1_000_000, 1)
 
+            # --- Initialize dialog state ---
+            if "show_map_dialog" not in st.session_state:
+                st.session_state.show_map_dialog = False
+
             # --- Display Title ---
             # Remove " County" from display title for better readability
             display_county = selected_county.replace(" County", "")
             st.header(f"Employment in {display_county} County, {selected_state} inundation zones for a {selected_inundation.lower()}")
             
             # --- Create columns for stats and map ---
-            stat_col, map_col = st.columns([2, 1])
+            stat_col, map_col = st.columns([3, 2]) # Changed to 60/40 split
 
             with stat_col:
                 st.subheader("Key Business Statistics")
@@ -113,7 +117,7 @@ def main():
                         naics_code = int(selection_data[f'impacted_naics4_{i}'])
                         emp_in_group = int(selection_data[f'emp_naics4_{i}'])
                         emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
-                        table_rows_html += f"<tr><td>{i}</td><td>{ind_group}</td><td>{naics_code}</td><td><b>{emp_percent}%</b></td></tr>"
+                        table_rows_html += f"<tr><td>{i}</td><td>{naics_code}</td><td>{ind_group}</td><td><b>{emp_percent}%</b></td></tr>"
 
                 table_html = f"""
                 <style>
@@ -141,10 +145,10 @@ def main():
                 <table class="styled-table">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Industry Group</th>
+                            <th> </th>
                             <th>NAICS Code</th>
-                            <th>% of Zonal Employment</th>
+                            <th>Industry Group</th>
+                            <th>% of Employment in Inundation Zone</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -154,19 +158,28 @@ def main():
                 """
                 st.markdown(table_html, unsafe_allow_html=True)
             
+            # Define image path once to use in the column and the dialog
+            state_abbreviations = {'Alabama': 'AL', 'Mississippi': 'MS'}
+            state_abbr = state_abbreviations.get(selected_state, '')
+            slosh_cat_num = ''.join(filter(str.isdigit, selected_inundation))
+            image_name = f"{display_county}_{state_abbr}_cat{slosh_cat_num}.jpg"
+            image_path = os.path.join("Inundation Maps", image_name)
+
             with map_col:
                 # --- Display Map ---
-                state_abbreviations = {'Alabama': 'AL', 'Mississippi': 'MS'}
-                state_abbr = state_abbreviations.get(selected_state, '')
-                slosh_cat_num = ''.join(filter(str.isdigit, selected_inundation))
-                # Use display_county for filename consistency
-                image_name = f"{display_county}_{state_abbr}_cat{slosh_cat_num}.jpg"
-                image_path = os.path.join("Inundation Maps", image_name)
-
                 if os.path.exists(image_path):
                     st.image(image_path, caption=f"Inundation zone map for {display_county} County, {selected_state} - {selected_inundation}")
+                    if st.button("View Larger Map"):
+                        st.session_state.show_map_dialog = True
                 else:
                     st.warning(f"Map file not found at the expected path: {image_path}. Please ensure maps are in the 'Inundation Maps' folder.")
+
+            # --- Handle Dialog for Large Map ---
+            if st.session_state.show_map_dialog:
+                with st.dialog("Inundation Map"):
+                    st.image(image_path, use_column_width=True)
+                    if st.button("Close"):
+                        st.session_state.show_map_dialog = False
             
         else:
             st.info("Please complete all selections above to view the analysis.")
