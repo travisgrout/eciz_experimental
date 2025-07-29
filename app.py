@@ -104,7 +104,7 @@ def main():
                 <ul>
                     <li>In 2021, there were approximately <b>{establishments:,}</b> {selected_county} County employers in a {selected_inundation.lower()} inundation zone.</li>
                     <li><b>{employment:,}</b> people worked at those businesses.</li>
-                    <li>A one-week closure of establishments in this inundation zone would result in about <b>\${lost_wages_millions:.1f} million</b> in lost wages and about <b>\${lost_sales_millions:.1f} million</b> in lost business sales.</li>
+                    <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
                 </ul>
             </div>
             """, unsafe_allow_html=True)
