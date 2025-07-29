@@ -24,8 +24,8 @@ def load_data(file_path):
 def view_map_dialog(image_path):
     """Displays the map image in a dialog."""
     if os.path.exists(image_path):
-        # Changed use_column_width to use_container_width
-        st.image(image_path, use_container_width=True) 
+        # Removed use_container_width to display the image at its actual size
+        st.image(image_path) 
     else:
         st.error("Map image could not be found.")
 
