@@ -104,6 +104,55 @@ def main():
                 </div>
                 """
                 st.markdown(stats_html, unsafe_allow_html=True)
+
+                # --- Generate HTML for Industry Table (Moved to Left Column) ---
+                table_rows_html = ""
+                for i in range(1, 6):
+                    ind_group = selection_data[f'impacted_indgrp_{i}']
+                    if pd.notna(ind_group):
+                        naics_code = int(selection_data[f'impacted_naics4_{i}'])
+                        emp_in_group = int(selection_data[f'emp_naics4_{i}'])
+                        emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
+                        table_rows_html += f"<tr><td>{i}</td><td>{ind_group}</td><td>{naics_code}</td><td><b>{emp_percent}%</b></td></tr>"
+
+                table_html = f"""
+                <style>
+                    .styled-table {{
+                        border-collapse: collapse;
+                        margin: 15px 0;
+                        font-size: 0.9em; /* Adjusted for better fit */
+                        width: 100%;
+                    }}
+                    .styled-table thead tr {{
+                        background-color: #f2f2f2;
+                        color: #333;
+                        text-align: left;
+                    }}
+                    .styled-table th,
+                    .styled-table td {{
+                        padding: 12px 15px;
+                        border: 1px solid #ddd;
+                    }}
+                    .styled-table td:nth-child(1), .styled-table td:nth-child(3), .styled-table td:nth-child(4) {{
+                        text-align: center;
+                    }}
+                </style>
+                <p style='font-size: 18px;'>The industry groups most affected by inundation in this zone would be:</p>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Industry Group</th>
+                            <th>NAICS Code</th>
+                            <th>% of Zonal Employment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table_rows_html}
+                    </tbody>
+                </table>
+                """
+                st.markdown(table_html, unsafe_allow_html=True)
             
             with map_col:
                 # --- Display Map ---
@@ -119,57 +168,6 @@ def main():
                 else:
                     st.warning(f"Map file not found at the expected path: {image_path}. Please ensure maps are in the 'Inundation Maps' folder.")
             
-            st.divider()
-
-            # --- Generate HTML for Industry Table (Full Width) ---
-            table_rows_html = ""
-            for i in range(1, 6):
-                ind_group = selection_data[f'impacted_indgrp_{i}']
-                if pd.notna(ind_group):
-                    naics_code = int(selection_data[f'impacted_naics4_{i}'])
-                    emp_in_group = int(selection_data[f'emp_naics4_{i}'])
-                    emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
-                    table_rows_html += f"<tr><td>{i}</td><td>{ind_group}</td><td>{naics_code}</td><td><b>{emp_percent}%</b></td></tr>"
-
-            table_html = f"""
-            <style>
-                .styled-table {{
-                    border-collapse: collapse;
-                    margin: 15px 0;
-                    font-size: 0.9em; /* Adjusted for better fit */
-                    width: 100%;
-                }}
-                .styled-table thead tr {{
-                    background-color: #f2f2f2;
-                    color: #333;
-                    text-align: left;
-                }}
-                .styled-table th,
-                .styled-table td {{
-                    padding: 12px 15px;
-                    border: 1px solid #ddd;
-                }}
-                 .styled-table td:nth-child(1), .styled-table td:nth-child(3), .styled-table td:nth-child(4) {{
-                    text-align: center;
-                }}
-            </style>
-            <p style='font-size: 18px;'>The industry groups most affected by inundation in this zone would be:</p>
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Industry Group</th>
-                        <th>NAICS Code</th>
-                        <th>% of Zonal Employment</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {table_rows_html}
-                </tbody>
-            </table>
-            """
-            st.markdown(table_html, unsafe_allow_html=True)
-
         else:
             st.info("Please complete all selections above to view the analysis.")
 
