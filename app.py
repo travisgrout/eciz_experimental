@@ -89,11 +89,39 @@ def main():
             display_county = selected_county.replace(" County", "")
             st.header(f"Employment in {display_county} County, {selected_state} inundation zones for a {selected_inundation.lower()}")
             
-            st.subheader("Key Business Statistics")
+            # --- Create columns for stats and map ---
+            stat_col, map_col = st.columns([2, 1])
 
-            # --- Generate HTML for Key Statistics and Industry Table ---
+            with stat_col:
+                st.subheader("Key Business Statistics")
+                stats_html = f"""
+                <div style='font-size: 18px;'>
+                    <ul>
+                        <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
+                        <li><b>{employment:,}</b> people worked at those businesses (<b>{percent_employment}%</b> of all jobs in {display_county} County).</li>
+                        <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
+                    </ul>
+                </div>
+                """
+                st.markdown(stats_html, unsafe_allow_html=True)
+            
+            with map_col:
+                # --- Display Map ---
+                state_abbreviations = {'Alabama': 'AL', 'Mississippi': 'MS'}
+                state_abbr = state_abbreviations.get(selected_state, '')
+                slosh_cat_num = ''.join(filter(str.isdigit, selected_inundation))
+                # Use display_county for filename consistency
+                image_name = f"{display_county}_{state_abbr}_cat{slosh_cat_num}.jpg"
+                image_path = os.path.join("Inundation Maps", image_name)
 
-            # First, build the HTML for the table rows dynamically
+                if os.path.exists(image_path):
+                    st.image(image_path, caption=f"Inundation zone map for {display_county} County, {selected_state} - {selected_inundation}")
+                else:
+                    st.warning(f"Map file not found at the expected path: {image_path}. Please ensure maps are in the 'Inundation Maps' folder.")
+            
+            st.divider()
+
+            # --- Generate HTML for Industry Table (Full Width) ---
             table_rows_html = ""
             for i in range(1, 6):
                 ind_group = selection_data[f'impacted_indgrp_{i}']
@@ -101,11 +129,9 @@ def main():
                     naics_code = int(selection_data[f'impacted_naics4_{i}'])
                     emp_in_group = int(selection_data[f'emp_naics4_{i}'])
                     emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
-                    # CORRECTED LINE: Changed to a single-line f-string to avoid unwanted whitespace.
                     table_rows_html += f"<tr><td>{i}</td><td>{ind_group}</td><td>{naics_code}</td><td><b>{emp_percent}%</b></td></tr>"
 
-            # Now, construct the entire HTML block in one go using a single f-string
-            full_html = f"""
+            table_html = f"""
             <style>
                 .styled-table {{
                     border-collapse: collapse;
@@ -127,44 +153,23 @@ def main():
                     text-align: center;
                 }}
             </style>
-            <div style='font-size: 18px;'>
-                <ul>
-                    <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
-                    <li><b>{employment:,}</b> people worked at those businesses (<b>{percent_employment}%</b> of all jobs in {display_county} County).</li>
-                    <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
-                </ul>
-                <p>The industry groups most affected by inundation in this zone would be:</p>
-                <table class="styled-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Industry Group</th>
-                            <th>NAICS Code</th>
-                            <th>% of Zonal Employment</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {table_rows_html}
-                    </tbody>
-                </table>
-            </div>
+            <p style='font-size: 18px;'>The industry groups most affected by inundation in this zone would be:</p>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Industry Group</th>
+                        <th>NAICS Code</th>
+                        <th>% of Zonal Employment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {table_rows_html}
+                </tbody>
+            </table>
             """
+            st.markdown(table_html, unsafe_allow_html=True)
 
-            # Render the complete HTML block
-            st.markdown(full_html, unsafe_allow_html=True)
-            
-            # --- Display Map ---
-            state_abbreviations = {'Alabama': 'AL', 'Mississippi': 'MS'}
-            state_abbr = state_abbreviations.get(selected_state, '')
-            slosh_cat_num = ''.join(filter(str.isdigit, selected_inundation))
-            # Use display_county for filename consistency
-            image_name = f"{display_county}_{state_abbr}_cat{slosh_cat_num}.jpg"
-            image_path = os.path.join("Inundation Maps", image_name)
-
-            if os.path.exists(image_path):
-                st.image(image_path, caption=f"Inundation zone map for {display_county} County, {selected_state} - {selected_inundation}")
-            else:
-                st.warning(f"Map file not found at the expected path: {image_path}. Please ensure maps are in the 'Inundation Maps' folder.")
         else:
             st.info("Please complete all selections above to view the analysis.")
 
