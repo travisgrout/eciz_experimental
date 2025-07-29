@@ -4,7 +4,7 @@ import os
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="SLOSH Inundation Zone Economic Impacts",
+    page_title="Employment in Coastal Inundation Zones",
     layout="wide"
 )
 
@@ -23,7 +23,7 @@ def load_data(file_path):
 def main():
     """Main function to run the Streamlit app."""
     st.title("Economic Impacts of SLOSH Inundation Zones")
-    st.markdown("Select a state, county, and storm category to see the potential economic impacts on local businesses.")
+    st.markdown("Select a state, county, and inundation type to learn about potential inundation impacts for local businesses.")
 
     # Load data
     df = load_data("Expected losses by SLOSH inundation zone.csv")
@@ -100,10 +100,14 @@ def main():
             # --- Display Key Statistics ---
             st.subheader("Key Business Statistics")
             st.markdown(f"""
-            - In 2021, there were approximately **{establishments:,}** {selected_county} County employers in a {selected_inundation.lower()} inundation zone.
-            - **{employment:,}** people worked at those businesses.
-            - A one-week closure of establishments in this inundation zone would result in about **${lost_wages_millions:.1f} million** in lost wages and about **${lost_sales_millions:.1f} million** in lost business sales.
-            """)
+            <div style='font-size: 18px;'>
+                <ul>
+                    <li>In 2021, there were approximately <b>{establishments:,}</b> {selected_county} County employers in a {selected_inundation.lower()} inundation zone.</li>
+                    <li><b>{employment:,}</b> people worked at those businesses.</li>
+                    <li>A one-week closure of establishments in this inundation zone would result in about <b>\${lost_wages_millions:.1f} million</b> in lost wages and about <b>\${lost_sales_millions:.1f} million</b> in lost business sales.</li>
+                </ul>
+            </div>
+            """, unsafe_allow_html=True)
         else:
             st.info("Please complete all selections above to view the analysis.")
 
