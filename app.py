@@ -89,8 +89,11 @@ def main():
             display_county = selected_county.replace(" County", "")
             st.header(f"Employment in {display_county} County, {selected_state} inundation zones for a {selected_inundation.lower()}")
             
-            # --- Generate Key Statistics HTML ---
-            stats_html = f"""
+            st.subheader("Key Business Statistics")
+
+            # --- Generate Combined HTML for stats and table ---
+            # The entire content is wrapped in a single div to ensure correct rendering.
+            full_html = f"""
             <div style='font-size: 18px;'>
                 <ul>
                     <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
@@ -98,16 +101,15 @@ def main():
                     <li>A one-week closure of establishments in this inundation zone would result in about <b>\${lost_wages_millions:.1f} million</b> in lost wages and about <b>\${lost_sales_millions:.1f} million</b> in lost business sales.</li>
                 </ul>
                 <p>The industry groups most affected by inundation in this zone would be:</p>
-            </div>
             """
             
-            # --- Generate Industry Table HTML ---
-            table_html = """
+            # Table HTML is appended to the main string
+            full_html += """
             <style>
                 .styled-table {
                     border-collapse: collapse;
                     margin: 15px 0;
-                    font-size: 1em;
+                    font-size: 0.9em; /* Adjusted for better fit */
                     width: 100%;
                 }
                 .styled-table thead tr {
@@ -119,6 +121,9 @@ def main():
                 .styled-table td {
                     padding: 12px 15px;
                     border: 1px solid #ddd;
+                }
+                 .styled-table td:nth-child(1), .styled-table td:nth-child(3), .styled-table td:nth-child(4) {
+                    text-align: center;
                 }
             </style>
             <table class="styled-table">
@@ -139,7 +144,7 @@ def main():
                     naics_code = int(selection_data[f'impacted_naics4_{i}'])
                     emp_in_group = int(selection_data[f'emp_naics4_{i}'])
                     emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
-                    table_html += f"""
+                    full_html += f"""
                     <tr>
                         <td>{i}</td>
                         <td>{ind_group}</td>
@@ -148,12 +153,11 @@ def main():
                     </tr>
                     """
 
-            table_html += "</tbody></table>"
+            # Close the table, and then close the main div
+            full_html += "</tbody></table></div>"
 
-
-            st.subheader("Key Business Statistics")
-            # Combine the list and table HTML for display
-            st.markdown(stats_html + table_html, unsafe_allow_html=True)
+            # Render the complete HTML block
+            st.markdown(full_html, unsafe_allow_html=True)
             
             # --- Display Map ---
             state_abbreviations = {'Alabama': 'AL', 'Mississippi': 'MS'}
