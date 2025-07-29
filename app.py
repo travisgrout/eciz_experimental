@@ -26,7 +26,7 @@ def main():
     st.markdown("Select a state, county, and inundation type to learn about potential inundation impacts for local businesses.")
 
     # Load data
-    df = load_data("Expected losses by SLOSH inundation zone.csv")
+    df = load_data("Expected losses by county and zone.csv")
 
     if df is not None:
         # --- User Selections ---
