@@ -77,7 +77,7 @@ def main():
             lost_sales_millions = round(sales_week / 1_000_000, 1)
 
             # --- Display Title and Map ---
-            st.header(f"Employment in {selected_county} County, {selected_state} inundation zones for a {selected_inundation.lower()}")
+            st.header(f"Employment in {selected_county} County, {selected_state} inundation zone for a {selected_inundation.lower()}")
 
             # A mapping of full state names to their abbreviations for file naming
             state_abbreviations = {
@@ -98,7 +98,7 @@ def main():
                 st.warning(f"Map file not found at the expected path: {image_path}. Please ensure maps are in the 'Inundation Maps' folder.")
 
             # --- Display Key Statistics ---
-            st.subheader("Key Business Statistics")
+            st.subheader("Jobs and employers in the inundation zone")
             st.markdown(f"""
             <div style='font-size: 18px;'>
                 <ul>
