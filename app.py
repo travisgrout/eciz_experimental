@@ -91,60 +91,17 @@ def main():
             
             st.subheader("Key Business Statistics")
 
-            # --- Generate Combined HTML for stats and table ---
-            # The entire content is wrapped in a single div to ensure correct rendering.
-            full_html = f"""
-            <div style='font-size: 18px;'>
-                <ul>
-                    <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
-                    <li><b>{employment:,}</b> people worked at those businesses (<b>{percent_employment}%</b> of all jobs in {display_county} County).</li>
-                    <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
-                </ul>
-                <p>The industry groups most affected by inundation in this zone would be:</p>
-            """
-            
-            # Table HTML is appended to the main string
-            full_html += """
-            <style>
-                .styled-table {
-                    border-collapse: collapse;
-                    margin: 15px 0;
-                    font-size: 0.9em; /* Adjusted for better fit */
-                    width: 100%;
-                }
-                .styled-table thead tr {
-                    background-color: #f2f2f2;
-                    color: #333;
-                    text-align: left;
-                }
-                .styled-table th,
-                .styled-table td {
-                    padding: 12px 15px;
-                    border: 1px solid #ddd;
-                }
-                 .styled-table td:nth-child(1), .styled-table td:nth-child(3), .styled-table td:nth-child(4) {
-                    text-align: center;
-                }
-            </style>
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Industry Group</th>
-                        <th>NAICS Code</th>
-                        <th>% of Zonal Employment</th>
-                    </tr>
-                </thead>
-                <tbody>
-            """
+            # --- Generate HTML for Key Statistics and Industry Table ---
 
+            # First, build the HTML for the table rows dynamically
+            table_rows_html = ""
             for i in range(1, 6):
                 ind_group = selection_data[f'impacted_indgrp_{i}']
                 if pd.notna(ind_group):
                     naics_code = int(selection_data[f'impacted_naics4_{i}'])
                     emp_in_group = int(selection_data[f'emp_naics4_{i}'])
                     emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
-                    full_html += f"""
+                    table_rows_html += f"""
                     <tr>
                         <td>{i}</td>
                         <td>{ind_group}</td>
@@ -153,8 +110,51 @@ def main():
                     </tr>
                     """
 
-            # Close the table, and then close the main div
-            full_html += "</tbody></table></div>"
+            # Now, construct the entire HTML block in one go using a single f-string
+            full_html = f"""
+            <style>
+                .styled-table {{
+                    border-collapse: collapse;
+                    margin: 15px 0;
+                    font-size: 0.9em; /* Adjusted for better fit */
+                    width: 100%;
+                }}
+                .styled-table thead tr {{
+                    background-color: #f2f2f2;
+                    color: #333;
+                    text-align: left;
+                }}
+                .styled-table th,
+                .styled-table td {{
+                    padding: 12px 15px;
+                    border: 1px solid #ddd;
+                }}
+                 .styled-table td:nth-child(1), .styled-table td:nth-child(3), .styled-table td:nth-child(4) {{
+                    text-align: center;
+                }}
+            </style>
+            <div style='font-size: 18px;'>
+                <ul>
+                    <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
+                    <li><b>{employment:,}</b> people worked at those businesses (<b>{percent_employment}%</b> of all jobs in {display_county} County).</li>
+                    <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
+                </ul>
+                <p>The industry groups most affected by inundation in this zone would be:</p>
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Industry Group</th>
+                            <th>NAICS Code</th>
+                            <th>% of Zonal Employment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {table_rows_html}
+                    </tbody>
+                </table>
+            </div>
+            """
 
             # Render the complete HTML block
             st.markdown(full_html, unsafe_allow_html=True)
