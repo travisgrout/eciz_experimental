@@ -85,7 +85,6 @@ def main():
             lost_sales_millions = round(sales_week / 1_000_000, 1)
 
             # --- Display Title ---
-            # Remove " County" from display title for better readability
             display_county = selected_county.replace(" County", "")
             st.header(f"Employment in {display_county} County, {selected_state} inundation zones for a {selected_inundation.lower()}")
             
@@ -95,7 +94,7 @@ def main():
                 <ul>
                     <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
                     <li><b>{employment:,}</b> people worked at those businesses (<b>{percent_employment}%</b> of all jobs in {display_county} County).</li>
-                    <li>A one-week closure of establishments in this inundation zone would result in about <b>\${lost_wages_millions:.1f} million</b> in lost wages and about <b>\${lost_sales_millions:.1f} million</b> in lost business sales.</li>
+                    <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
                 </ul>
                 <p>The industry groups most affected by inundation in this zone would be:</p>
                 <ol>
@@ -113,7 +112,6 @@ def main():
             stats_html += "".join(industry_list)
             stats_html += "</ol></div>"
 
-            st.subheader("Key Business Statistics")
             st.markdown(stats_html, unsafe_allow_html=True)
             
             # --- Display Map ---
