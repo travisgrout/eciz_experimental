@@ -100,17 +100,54 @@ def main():
                 <ol>
             """
             
-            industry_list = []
+            # --- Generate Industry Table HTML ---
+            table_html = """
+            <style>
+                .styled-table {
+                    border-collapse: collapse;
+                    margin: 15px 0;
+                    font-size: 1em;
+                    width: 100%;
+                }
+                .styled-table thead tr {
+                    background-color: #f2f2f2;
+                    color: #333;
+                    text-align: left;
+                }
+                .styled-table th,
+                .styled-table td {
+                    padding: 12px 15px;
+                    border: 1px solid #ddd;
+                }
+            </style>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Industry Group</th>
+                        <th>NAICS Code</th>
+                        <th>% of Zonal Employment</th>
+                    </tr>
+                </thead>
+                <tbody>
+            """
+
             for i in range(1, 6):
                 ind_group = selection_data[f'impacted_indgrp_{i}']
                 if pd.notna(ind_group):
                     naics_code = int(selection_data[f'impacted_naics4_{i}'])
                     emp_in_group = int(selection_data[f'emp_naics4_{i}'])
                     emp_percent = round((emp_in_group / total_emp_in_zone) * 100) if total_emp_in_zone > 0 else 0
-                    industry_list.append(f"<li>{ind_group} (NAICS {naics_code}): <b>{emp_percent}%</b> of employees working in the inundation zone</li>")
-            
-            stats_html += "".join(industry_list)
-            stats_html += "</ol></div>"
+                    table_html += f"""
+                    <tr>
+                        <td>{i}</td>
+                        <td>{ind_group}</td>
+                        <td>{naics_code}</td>
+                        <td><b>{emp_percent}%</b></td>
+                    </tr>
+                    """
+
+            table_html += "</tbody></table>"
 
             st.markdown(stats_html, unsafe_allow_html=True)
             
