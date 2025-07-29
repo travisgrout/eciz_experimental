@@ -20,13 +20,12 @@ def load_data(file_path):
         st.error(f"Error: The file '{file_path}' was not found. Please make sure it's in the correct directory.")
         return None
 
-# --- Dialog Function ---
-# This function is decorated to act as a dialog box.
 @st.dialog("Inundation Map")
 def view_map_dialog(image_path):
     """Displays the map image in a dialog."""
     if os.path.exists(image_path):
-        st.image(image_path, use_column_width=True)
+        # Changed use_column_width to use_container_width
+        st.image(image_path, use_container_width=True) 
     else:
         st.error("Map image could not be found.")
 
