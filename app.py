@@ -4,7 +4,7 @@ import os
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="SLOSH Inundation Zone Economic Impacts",
+    page_title="Employment in Coastal Inundation Zones",
     layout="wide"
 )
 
@@ -44,8 +44,8 @@ def main():
     # --- Main Page Content ---
     # Only render the main page if the dialog is not shown.
     else:
-        st.title("Economic Impacts of SLOSH Inundation Zones")
-        st.markdown("Select a state, county, and storm category to see the potential economic impacts on local businesses.")
+        st.title("Employment in Coastal Inundation Zones")
+        st.markdown("Select a state, county, and storm category to learn about the potential economic impacts on local businesses.")
 
         # Load data from the new spreadsheet
         df = load_data("Expected losses by county and zone.csv")
@@ -117,8 +117,8 @@ def main():
                     stats_html = f"""
                     <div style='font-size: 18px;'>
                         <ul>
-                            <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone (<b>{percent_establishments}%</b> of all employers in {display_county} County).</li>
-                            <li><b>{employment:,}</b> people worked at those businesses (<b>{percent_employment}%</b> of all jobs in {display_county} County).</li>
+                            <li>In 2021, there were approximately <b>{establishments:,}</b> {display_county} County employers in a {selected_inundation.lower()} inundation zone.<br><i>(<b>{percent_establishments}%</b> of all employers in {display_county} County)</i></li>
+                            <li><b>{employment:,}</b> people worked at those businesses.<br><i>(<b>{percent_employment}%</b> of all jobs in {display_county} County)</i></li>
                             <li>A one-week closure of establishments in this inundation zone would result in about <b>${lost_wages_millions:.1f} million</b> in lost wages and about <b>${lost_sales_millions:.1f} million</b> in lost business sales.</li>
                         </ul>
                     </div>
@@ -153,7 +153,7 @@ def main():
                             padding: 12px 15px;
                             border: 1px solid #ddd;
                         }}
-                        .styled-table td:nth-child(1), .styled-table td:nth-child(3), .styled-table td:nth-child(4) {{
+                        .styled-table td:nth-child(1), .styled-table td:nth-child(2), .styled-table td:nth-child(4) {{
                             text-align: center;
                         }}
                     </style>
