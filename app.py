@@ -22,7 +22,7 @@ def load_data(file_path):
 # --- Main Application ---
 def main():
     """Main function to run the Streamlit app."""
-    st.title("Economic Impacts of SLOSH Inundation Zones")
+    st.title("Employment in Coastal Inundation Zones")
     st.markdown("Select a state, county, and inundation type to learn about potential inundation impacts for local businesses.")
 
     # Load data
